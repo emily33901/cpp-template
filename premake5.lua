@@ -2,7 +2,7 @@ require("premake_modules/export-compile-commands")
 require("premake_modules/cmake")
 
 workspace "workspace"
-    configurations { "debug", "release" }
+    configurations { "Debug", "Release" }
     platforms { "x32", "x64" }
 
     location "premake"
@@ -18,30 +18,30 @@ workspace "workspace"
         architecture "x64"
     filter {}
 
+    cppdialect "C++17"
+
     -- Setup c++ spec per platform
     -- Linux uses a buildoption to allow for more
     -- up to date standards (2a)
     filter {"system:windows"}
         toolset "msc-v141"
-        cppdialect "C++17"
-        buildoptions{ "--driver-mode=cl" } -- for compile commands
     filter {"system:linux"}
         toolset "clang" -- prefer clang over gcc
-        buildoptions "-std=c++17"
+        -- buildoptions "-std=c++17"
     filter {}
 
     -- Setup configurations
     filter "configurations:Debug"
         defines { "DEBUG", "_DEBUG" }
         optimize "Off"
-
+        runtime "Debug"
+        
         filter {"system:windows"}
-            symbols "Full"
+            symbols "Full" -- We need symbols Full instead of just On
         filter {"system:linux"}
             symbols "On"
             buildoptions "-g3" -- need this for gdb
         filter {}
-        runtime "Debug"
 
     filter {"configurations:Release"}
         defines { "NDEBUG" }
@@ -56,7 +56,7 @@ workspace "workspace"
         language "C++"
         targetdir "bin/%{cfg.buildcfg}"
         
-        -- Windows and linux use different precompiled header stuff
+        -- Windows and linux use different precompiled header path locations
         filter {"system:linux"}
             pchheader "src/precompiled.hh"
         filter {"system:windows"}
